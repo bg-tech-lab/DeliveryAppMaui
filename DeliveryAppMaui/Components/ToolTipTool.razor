@@ -1,0 +1,23 @@
+﻿
+
+<div class="tooltip-container">
+    <img src="images/noun-information.svg" @onclick="(() => ToggleTooltip())" class="info_icon" />
+
+    @if (IsVisible)
+    {
+        <div class="tooltip @AdditionalCssClass">
+            @TooltipText
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string TooltipText { get; set; }
+    [Parameter] public string AdditionalCssClass { get; set; }
+
+    private void ToggleTooltip()
+    {
+        IsVisible = !IsVisible;
+    }
+}

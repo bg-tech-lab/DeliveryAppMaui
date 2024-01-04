@@ -1,0 +1,457 @@
+﻿@page "/"
+
+@inject MailContoller mailController
+@inject OutlookController outLookController
+@inject PdfModel pdfmodel
+@inject PdfController pdfController
+@inject Labels labels
+@inject LabelData labelData
+@inject PrinterController printerController
+@inject IJSRuntime JsRuntime
+
+
+<div class="PageBody">
+    <div class="pageContent">
+        <div class="top_row">
+            <div class="headingSubheading">
+                <h1 class="page_title">Generate Delivery Note</h1>
+                @* <p class="page_subtitle">This page is responsible for the following: </p> *@
+            </div>
+            @* <span>
+                <ol>
+                    <li>Generates a delivery note (DN) in PDF format.</li>
+                    <li>Sending of an email to a list of reciepients.</li>
+                    <li>Sending of a calendar reminder and a copy of the DN.</li>
+                    <li>Prints pick labels for products.</li>
+                </ol>
+            </span> *@
+            <div class="errorMessages">
+                <p class="prompt_message">@PromptMessage</p>
+                <p class="error_message">@ErrorMessage</p>
+            </div>
+        </div>
+
+        <div class="allForms_section">
+            <div class="form_section">
+                <fieldset>
+                    <legend>General Information:</legend>
+                    <label for="clientName">Client Name:</label>
+                    <input type="text" id="clientName" name="clientName" @bind-value="@ClientName">
+                    <label for="clientAddress">Client Address:</label>
+                    <input type="text" id="clientAddress" name="clientAddress" @bind-value="@ClientAddress">
+                    <label for="clientNumber">Client Number:</label>
+                    <input type="text" id="clientNumber" name="clientNumber" @bind-value="@ClientNumber">
+                    <label for="packagingLocation">Place of Packaging:</label>
+                    <input type="text" id="packagingLocation" name="packagingLocation" @bind-value="@PackingLocation">
+                    <label for="numberOfLabel">Number of Labels:</label>
+                    <input type="number" id="numberOfLabel" name="numberOfLabel" @bind-value="@NumberOfLabels">
+                </fieldset>
+            </div>
+
+            <div class="user_email_section">
+                <fieldset>
+                    <legend>Email From:</legend>
+                    <label for="userEmail">Email Address:</label>
+                    <input type="text" id="userEmail" name="userEmail" @bind-value="@UserEmailAddress">
+                    <label for="userPassword">Email Password:</label>
+                    <input type="text" id="userPassword" name="userPassword" @bind-value="@UserPassword">
+                </fieldset>
+
+                <fieldset>
+                    <legend>Recipients:</legend>
+                    <div class="tooltip_label_container">
+                        <label for="recipientsEmail">List of Email Addresses:</label>
+                        <div class="tooltip_container" id="ToolTip_1">
+                            <ToolTipTool IsVisible="tooltip1Visible" TooltipText="If you have multiple addresses, seperate them with the 'Enter' key." AdditionalCssClass="custom_tooltip1" />
+                        </div>
+                    </div>
+                    <textarea id="recipientsEmail" name="recipientsEmail" @bind="@ToEmailAddress"></textarea>
+                </fieldset>
+            </div>
+
+            <div class="user_reminder_section">
+                <fieldset>
+                    <legend>Calendar Reminder:</legend>
+                    <div class="tooltip_label_container">
+                        <label for="startDate">Start Date & Time:</label>
+                        <div class="tooltip_container" id="ToolTip_2">
+                            <ToolTipTool IsVisible="tooltip2Visible" TooltipText="Format easier to read: {2024}-{01}-{04}T{08}-{00}-{00}. This field will only take the correct format used as the fields placeholder." AdditionalCssClass="custom_tooltip2" />
+                        </div>
+                    </div>
+                    <input type="text" id="startDate" name="startDate" placeholder="20240104T080000" @bind-value="@StartDate">
+                    <label for="endDate">End Date & Time:</label>
+                    <input type="text" id="endDate" name="endDate" placeholder="20240104T080000" @bind-value="@EndDate">
+                </fieldset>
+            </div>
+
+            <div class="products_section">
+                <fieldset>
+                    <legend>Product Information:</legend>
+                    <label for="ProductName">Product Name:</label>
+                    <input type="text" id="ProductName" name="ProductName" @bind-value="@ProductName">
+                    <label for="ProductDescription">Product Desctiption:</label>
+                    <textarea id="ProductDescription" name="ProductDescription" @bind="@ProductDescription"></textarea>
+                    <label for="ProductQty">Product Qty:</label>
+                    <input type="text" id="ProductQty" name="ProductQty" @bind-value="@ProductQty">
+                </fieldset>
+            </div>
+
+            <div class="buttons_section">
+                <button class="button" id="clearFieldsBtn" @onclick="(() =>ClearFields())">Clear</button>
+                <button class="button" id="startProcessBtn" @onclick="(() =>StartProcess())">Process</button>
+                <button class="button" id="addProductBtn" @onclick="(() =>AddProductToList())">Add Product</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    public static string DCodeLogo { get; set; }
+
+    private bool tooltip1Visible = false;
+    private bool tooltip2Visible = false;
+
+    public static string ClientName { get; set; }
+    public static string ClientAddress { get; set; }
+    public static string ClientNumber { get; set; }
+    public static string PackingLocation { get; set; }
+
+    public static string UserEmailAddress { get; set; }
+    public static string UserPassword { get; set; }
+
+    public static string ToEmailAddress { get; set; }
+    public static List<string> ListOfReceipients { get; set; }
+    public string StartDate { get; set; }
+    public string EndDate { get; set; }
+
+    public string ProductName { get; set; }
+    public string ProductDescription { get; set; }
+    public string ProductQty { get; set; }
+    public int i { get; set; }
+
+    public List<PdfTable> PdfTableList { get; set; }
+
+    public int NumberOfLabels { get; set; }
+
+    public string ErrorMessage { get; set; }
+    public string PromptMessage { get; set; }
+    public bool HasError { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PdfTableList = new();
+        i = 0;
+        ClientName = "";
+        ClientAddress = "";
+        ClientNumber = "";
+        PackingLocation = "d.Code Mobility Offices";
+        UserEmailAddress = "jonathanqoqonga@gmail.com";
+        UserPassword = "";
+        ToEmailAddress = "";
+        ProductName = "";
+        ProductDescription = "";
+        ProductQty = "";
+        StartDate = "";
+        EndDate = "";
+        NumberOfLabels = 1;
+        DCodeLogo = "/images/dcodelogo.png";
+        ListOfReceipients = new();
+        await ScrollToTop();
+    }
+
+    public async Task ClearFields()
+    {
+        ErrorMessage = "";
+        PromptMessage = "";
+
+        PdfTableList = new();
+        i = 0;
+        ClientName = "";
+        ClientAddress = "";
+        ClientNumber = "";
+        PackingLocation = "d.Code Mobility Offices";
+        UserEmailAddress = "jonathanqoqonga@gmail.com";
+        UserPassword = "";
+        ToEmailAddress = "";
+        ProductName = "";
+        ProductDescription = "";
+        ProductQty = "";
+        StartDate = "";
+        EndDate = "";
+        NumberOfLabels = 1;
+        DCodeLogo = "/images/dcodelogo.png";
+        ListOfReceipients = new();
+
+        await ScrollToTop();
+    }
+
+    
+
+
+    public async Task StartProcess()
+    {
+        try
+        {
+            ErrorMessage = "";
+            PromptMessage = "";
+
+            // Validation
+            var entriesAreValidated = await ValidateMainFormEntries();
+
+            if (!entriesAreValidated) { return; }
+
+            // PDF Functionality
+            var numberOfProducts = await GetProductCount();
+
+            if (numberOfProducts < 1)
+            {
+                ErrorMessage = "There are no products in this delivery note. Please try adding them.";
+                StateHasChanged();
+                await ScrollToTop();
+                return;
+            }
+
+            var pdfDocumentDir = pdfController.GeneratePdf(ClientName, ClientAddress, ClientNumber, PackingLocation, numberOfProducts, PdfTableList);
+
+            if (string.IsNullOrEmpty(pdfDocumentDir))
+            {
+                ErrorMessage = "There was a problem with the generation of the document, please try again, or contact a developer.";
+                StateHasChanged();
+                await ScrollToTop();
+                return;
+            }
+            else
+            {
+                ErrorMessage = "";
+                PromptMessage = "Pdf Document Successfully Generated!";
+                StateHasChanged();
+                await ScrollToTop();
+            }
+
+            // Email Functionality
+            var listOfReceipients = await GetEmailReceipients();
+
+            var numberOfEmailReceipients = ListOfReceipients.Count();
+
+            if (ListOfReceipients.Count() < 1)
+            {
+                ErrorMessage = "Please enter a valid number of email reciepients.";
+                StateHasChanged();
+                await ScrollToTop();
+                return;
+            }
+
+            bool hasError;
+            mailController.SendEmail(pdfDocumentDir, listOfReceipients, UserEmailAddress, UserPassword, ClientName, StartDate, EndDate, out hasError);
+
+            if (!hasError)
+            {
+                ErrorMessage = "There was an issue with the sending of the mails, please double check your inputed values.";
+                StateHasChanged();
+                await ScrollToTop();
+                return;
+            }
+            else
+            {
+                PromptMessage = "Emails Successfully sent!";
+                StateHasChanged();
+                await ScrollToTop();
+            }
+
+            //Printer Functionality
+            printerController.PrintLabel(NumberOfLabels);
+
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"There was a problem processing the program, because: \"{ex.Message}\"";
+            StateHasChanged();
+            await ScrollToTop();
+        }
+    }
+
+    public async Task<int> GetProductCount()
+    {
+        try
+        {
+            return PdfTableList.Count();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"There was a problem counting the number of products, because: \"{ex.Message}\"";
+            StateHasChanged();
+            await ScrollToTop();
+            return 0;
+        }
+    }
+
+    public async Task<bool> ValidateProductItems()
+    {
+        int number;
+
+        if (string.IsNullOrEmpty(ProductName))
+        {
+            ErrorMessage = $"Please enter the product name before adding a product.";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(ProductDescription))
+        {
+            ErrorMessage += $"Please enter the products description before adding a product.";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(ProductQty))
+        {
+            ErrorMessage += $"Please enter the products qty before adding a product.";
+            await ScrollToTop();
+            return false;
+        }
+
+        if (int.TryParse(ProductQty, out number))
+        {
+            if (number.ToString().Length > 3)
+            {
+                ErrorMessage += "The product QTY is higher than 999, please use a value less than 3 digits!";
+                await ScrollToTop();
+                return false;
+            }
+            return true;
+        }
+        else
+        {
+            ErrorMessage += "You need to insert a number and not text";
+            await ScrollToTop();
+            return false;
+        }
+    }
+
+    public async Task<bool> ValidateMainFormEntries()
+    {
+        if (string.IsNullOrEmpty(ClientName))
+        {
+            ErrorMessage += "You need to enter a client name!";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(ClientAddress))
+        {
+            ErrorMessage += "You need to enter a client address!";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(ClientNumber))
+        {
+            ErrorMessage += "You need to enter the clients contact details!";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(UserPassword))
+        {
+            ErrorMessage += "You need to enter the email address password, get it in Keeper!";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(ToEmailAddress))
+        {
+            ErrorMessage += "Your email receipt list is empty, no email will/ can be sent!";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(StartDate))
+        {
+            ErrorMessage += "You need to input the start date for the calendar remindar";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(EndDate))
+        {
+            ErrorMessage += "You need to input the end date for the calendar remindar";
+            await ScrollToTop();
+            return false;
+        }
+
+        return true;
+
+        // var strings = new[] { ClientName, ClientAddress, ClientNumber, UserPassword, ToEmailAddress, ProductName, ProductDescription, ProductQty, StartDate, EndDate };
+
+        // foreach (var item in strings)
+        // {
+        //     int nullOrEmptyIndex = strings
+        //     .Select((value, index) => new { value, index })
+        //     .FirstOrDefault(pair => string.IsNullOrEmpty(pair.value))?.index ?? -1;
+
+        //     if (nullOrEmptyIndex != -1)
+        //     {
+        //         ErrorMessage = $"The string at index {nullOrEmptyIndex} is null or empty: {strings[nullOrEmptyIndex]}";
+        //     }
+        //     else
+        //     {
+        //         PromptMessage = "There are no null or empty strings.";
+        //     }
+        // }
+    }
+
+    public async Task AddProductToList()
+    {
+        try
+        {
+            ErrorMessage = "";
+            PromptMessage = "";
+
+            bool valuesValidated = await ValidateProductItems();
+
+            if (!valuesValidated) { return; }
+
+            PdfTableList.Add(new PdfTable());
+            PdfTableList[i].ItemName = ProductName;
+            PdfTableList[i].ItemDescription = ProductDescription;
+            PdfTableList[i].Qty = ProductQty;
+            i++;
+
+            PromptMessage = $"{ProductName} added to the list of products.";
+            StateHasChanged();
+
+            ProductName = "";
+            ProductDescription = "";
+            ProductQty = "";
+            await ScrollToTop();
+
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"There was a problem adding the product to the table, because: \"{ex.Message}\". Please check your input.";
+            await ScrollToTop();
+        }
+    }
+
+    public async Task<List<string>> GetEmailReceipients()
+    {
+        try
+        {
+            List<string> stringList = new List<string>(ToEmailAddress.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            ListOfReceipients = new();
+
+            foreach (var item in stringList)
+            {
+                ListOfReceipients.Add(item);
+            }
+
+            return ListOfReceipients;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"There was a problem formatting the email reciepients, because: \"{ex.Message}\"";
+            StateHasChanged();
+            await ScrollToTop();
+            return new List<string>();
+        }
+    }
+
+    private async Task ScrollToTop()
+    {
+        await JsRuntime.InvokeVoidAsync("window.scrollToTop");
+    }
+
+}

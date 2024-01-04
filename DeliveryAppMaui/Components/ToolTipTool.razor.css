@@ -1,0 +1,50 @@
+﻿﻿
+.info_icon {
+    width: 25px;
+    margin-top: .5rem;
+}
+
+.tooltip-container {
+    position: relative;
+}
+
+.tooltip {
+    display: flex;
+    align-items: center;
+    border: 2px solid black;
+    border-radius: 7px;
+    background-color: lightgrey;
+    padding: .5rem 1rem;
+    position: absolute;
+    right: 0;
+    width: 10rem;
+    min-height: 3rem;
+    font-size: .8rem;
+    transition: all 0.3s ease-in-out;
+    opacity: 1;
+    color: black;
+    font-weight: bold;
+}
+
+.custom_tooltip1 {
+    background-color: papayawhip;
+    color: black;
+}
+
+.custom_tooltip2 {
+    background-color: papayawhip;
+}
+
+.custom_tooltip3 {
+    background-color: yellow;
+    top: -9rem;
+}
+
+.custom_tooltip4 {
+    background-color: rgba(188,143,143,.3);
+}
+
+.custom_tooltip5 {
+    background-color: blue;
+    transition: all 0.3s ease-in-out;
+}

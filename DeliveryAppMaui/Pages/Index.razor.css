@@ -1,0 +1,177 @@
+﻿.PageBody {
+    margin: 0;
+    padding: 0 2rem;
+}
+
+.pageContent {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.top_row {
+    width: 100%;
+    display: flex;
+    margin-bottom: 2rem;
+    padding-top: 4rem;
+}
+
+.page_logo {
+    width: 30%;
+}
+
+.page_title {
+    margin: 0;
+    font-size: 2.3rem;
+    font-weight: 600;
+}
+
+.page_subtitle {
+    font-size: 1.3em;
+}
+
+.headingSubheading {
+    margin-right: 5rem;
+}
+
+li {
+    color: black;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.prompt_message {
+    color: green;
+    font-weight: bold;
+}
+
+.error_message {
+    color: red;
+    font-weight: bold;
+}
+
+.allForms_section {
+    background-color: rgba(132,148,170,.7);
+    border-radius: 12px;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.form_section {
+    display: flex;
+    width: 100%;
+}
+
+    fieldset {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 2rem;
+    }
+
+legend {
+    font-weight: 600;
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+
+}
+
+label {
+    color: black;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+input {
+    margin-top: .8rem;
+    margin-bottom: 2rem;
+    padding: .6rem;
+    color: black;
+    font-weight: 500;
+    border-radius: 7px;
+    width: 70%;
+}
+
+textarea {
+    width: 70%;
+    height: 7rem;
+    padding: .6rem;
+    color: black;
+    font-weight: 500;
+    border-radius: 7px;
+    margin-top: .8rem;
+    margin-bottom: 2rem;
+}
+
+.user_email_section {
+    display: flex;
+    flex-direction: column;
+}
+
+    .user_email_section fieldset {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user_reminder_section {
+    
+    }
+
+.buttons_section {
+    width: 133%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.button {
+    width: 10rem;
+    padding: .7rem;
+    border-radius: 7px;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+}
+
+#clearFieldsBtn {
+    background-color: transparent;
+    border: 2px solid black;
+    color: black;
+}
+
+    #clearFieldsBtn:hover {
+        background-color: rgba(9,0,0,.3);
+        color: white;
+    }
+
+#startProcessBtn {
+    background-color: lightyellow
+}
+
+    #startProcessBtn:hover {
+        background-color: lightgoldenrodyellow;
+    }
+
+#addProductBtn {
+    background-color: rgb(132,148,170);
+}
+
+    #addProductBtn:hover {
+        background-color: rgba(132,148,170,.7);
+    }
+
+.tooltip_label_container {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    width: 50%;
+}
+
+.tooltip_container {
+    position: relative;
+    z-index: 100;
+    display: flex;
+}
+
