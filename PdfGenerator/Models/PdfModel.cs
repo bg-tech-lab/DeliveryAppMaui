@@ -42,11 +42,4 @@ namespace PdfGenerator.Models
             ListOfItems = new List<PdfTable>();
         }
     }
-
-    public class PdfTable
-    {
-        public string ItemName { get; set; }
-        public string ItemDescription { get; set; }
-        public string Qty { get; set; }
-    }
 }

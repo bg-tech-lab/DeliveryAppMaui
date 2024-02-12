@@ -1,25 +1,13 @@
-﻿using PdfSharp.Drawing;
-using PdfSharp.Fonts;
-using PdfSharp.Pdf;
-using PdfSharp.Snippets.Font;
-using PdfSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DeliveryAppAPI.Models;
 using PdfGenerator.Models;
-using Grpc.Core;
-using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
-using System.Security.Cryptography;
-using System.IO;
+using PdfTable = DeliveryAppAPI.Models.PdfTable;
 
-namespace PdfGenerator
+namespace DeliveryAppAPI.Methods
 {
     public class PdfController
     {
-        public static PdfModel? PdfToLabel { get; set; }
-        public string GeneratePdf(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<PdfTable> listOfProducts)
+        public static FormFields? PdfToLabel { get; set; }
+        public string GeneratePdf(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<Models.PdfTable> listOfProducts)
         {
             try
             {
@@ -37,7 +25,7 @@ namespace PdfGenerator
             }
         }
 
-        private string HTMLString(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<PdfTable> listOfProducts)
+        private string HTMLString(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<Models.PdfTable> listOfProducts)
         {
             try
             {
@@ -91,9 +79,9 @@ namespace PdfGenerator
             }
 
         }
-        
 
-        private string GetHtmlPdf(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<PdfTable> listOfProducts)
+
+        private string GetHtmlPdf(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<Models.PdfTable> listOfProducts)
         {
             var pdfParams = GetValuesForPdf(clientName, clientAddress, clientContactDetails, location, productCount, listOfProducts);
             PdfToLabel = pdfParams;
@@ -153,29 +141,29 @@ namespace PdfGenerator
             return pdfAsHtml;
         }
 
-        private PdfModel GetValuesForPdf(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<PdfTable> listOfProducts)
+        private FormFields GetValuesForPdf(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<Models.PdfTable> listOfProducts)
         {
-            PdfModel pdfModel = new PdfModel();
+            FormFields formFields = new FormFields();
 
-            pdfModel.ClientName = clientName;
+            formFields.ClientName = clientName;
 
-            pdfModel.ClientAddress = clientAddress;
+            formFields.ClientAddress = clientAddress;
 
-            pdfModel.ClientContactDetails = clientContactDetails;
+            formFields.ClientContactDetails = clientContactDetails;
 
-            pdfModel.ReferenceNumber = Guid.NewGuid();
+            formFields.ReferenceNumber = Guid.NewGuid();
 
-            pdfModel.Location = location;
+            formFields.Location = location;
 
             for (int i = 0; i < productCount; i++)
             {
-                pdfModel.ListOfItems.Add(new PdfTable());
-                pdfModel.ListOfItems[i].ItemName = listOfProducts[i].ItemName;
-                pdfModel.ListOfItems[i].ItemDescription = listOfProducts[i].ItemDescription;
-                pdfModel.ListOfItems[i].Qty = listOfProducts[i].Qty;
+                formFields.ListOfItems.Add(new PdfTable());
+                formFields.ListOfItems[i].ItemName = listOfProducts[i].ItemName;
+                formFields.ListOfItems[i].ItemDescription = listOfProducts[i].ItemDescription;
+                formFields.ListOfItems[i].Qty = listOfProducts[i].Qty;
             }
 
-            return pdfModel;
+            return formFields;
         }
     }
 }
