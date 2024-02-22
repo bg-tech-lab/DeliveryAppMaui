@@ -1,0 +1,293 @@
+﻿@page "/labelprinter"
+
+@inject MailContoller mailController
+@inject OutlookController outLookController
+@inject PdfModel pdfmodel
+@inject PdfController pdfController
+@inject Labels labels
+@inject LabelData labelData
+@inject PrinterOnlyController printerOnlyController
+@inject IJSRuntime JsRuntime
+
+
+<div class="PageBody">
+    <div class="pageContent">
+        <div class="top_row">
+            <div class="headingSubheading">
+                <h1 class="page_title">Dedicated Label Printer</h1>
+            </div>
+            <div class="errorMessages">
+                <p class="prompt_message">@PromptMessage</p>
+                <p class="error_message">@ErrorMessage</p>
+            </div>
+        </div>
+
+        <div class="allForms_section">
+            <div class="form_section">
+                <fieldset>
+                    <legend>General Information:</legend>
+                    <label for="clientName">Client Name:</label>
+                    <input type="text" id="clientName" name="clientName" @bind-value="@ClientName">
+                    <label for="numberOfLabel">Number of Labels:</label>
+                    <input type="number" id="numberOfLabel" min="1" max="10" name="numberOfLabel" @bind-value="@NumberOfLabels">
+                </fieldset>
+
+                @if (PdfTableList.Count > 0)
+                {
+                    <div class="product_table_container">
+                        <table>
+                            <tr>
+                                <th style="width:65%">Product Name</th>
+                                <th>Product Qty</th>
+                            </tr>
+                            @foreach (var item in PdfTableList)
+                            {
+                                <tr>
+                                    <td>@item.ItemName</td>
+                                    <td>@item.Qty</td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+                }
+
+            </div>
+
+            <div class="products_section">
+                <fieldset>
+                    <legend>Product Information:</legend>
+                    <label for="ProductName">Product Name:</label>
+                    <input type="text" id="ProductName" name="ProductName" @bind-value="@ProductName">
+                    <label for="ProductDescription">Product Desctiption:</label>
+                    <textarea id="ProductDescription" name="ProductDescription" @bind="@ProductDescription"></textarea>
+                    <label for="ProductQty">Product Qty:</label>
+                    <input type="text" id="ProductQty" name="ProductQty" @bind-value="@ProductQty">
+                </fieldset>
+            </div>
+
+            <div class="buttons_section">
+                <button class="button" id="clearFieldsBtn" @onclick="(() =>ClearFields())">Clear</button>
+                <button class="button" id="startProcessBtn" @onclick="(() =>StartProcess())">Print Label</button>
+                <button class="button" id="addProductBtn" @onclick="(() =>AddProductToList())">Add Product</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    public static string DCodeLogo { get; set; }
+
+    private bool tooltip1Visible = false;
+    private bool tooltip2Visible = false;
+
+    public static string ClientName { get; set; }
+
+    public string ProductName { get; set; }
+    public string ProductDescription { get; set; }
+    public string ProductQty { get; set; }
+    public int i { get; set; }
+
+    public List<PdfTable> PdfTableList { get; set; }
+
+    public int NumberOfLabels { get; set; }
+
+    public string ErrorMessage { get; set; }
+    public string PromptMessage { get; set; }
+    public bool HasError { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PdfTableList = new();
+        i = 0;
+        ClientName = "";
+        ProductName = "";
+        ProductDescription = "";
+        ProductQty = "";
+        NumberOfLabels = 1;
+        DCodeLogo = "/images/dcodelogo.png";
+        await ScrollToTop();
+    }
+
+    public async Task ClearFields()
+    {
+        ErrorMessage = "";
+        PromptMessage = "";
+
+        PdfTableList = new();
+        i = 0;
+        ClientName = "";
+        ProductName = "";
+        ProductDescription = "";
+        ProductQty = "";
+        NumberOfLabels = 1;
+        DCodeLogo = "/images/dcodelogo.png";
+        PromptMessage = "All Fields Cleared!";
+
+        await ScrollToTop();
+    }
+
+
+
+
+    public async Task StartProcess()
+    {
+        try
+        {
+            ErrorMessage = "";
+            PromptMessage = "";
+
+            // Validation
+            var entriesAreValidated = await ValidateMainFormEntries();
+
+            if (!entriesAreValidated) { return; }
+
+            // PDF Functionality
+            var numberOfProducts = await GetProductCount();
+
+            if (numberOfProducts < 1)
+            {
+                ErrorMessage = "There are no products in this delivery note. Please try adding them.";
+                StateHasChanged();
+                await ScrollToTop();
+                return;
+            }
+
+
+            //Printer Functionality
+            var isPrinted = printerOnlyController.PrintLabel(NumberOfLabels, ClientName, PdfTableList);
+
+            if (isPrinted)
+            {
+                if (numberOfProducts == 1)
+                {
+                    PromptMessage = $"{NumberOfLabels} label has been printed for {numberOfProducts} product!";
+                }
+                else
+                {
+                    PromptMessage = $"{NumberOfLabels} labels have been printed for {numberOfProducts} products!";
+                }
+            }
+            else
+            {
+                ErrorMessage = "No label or Labels were printed, there was an issue with the processing of your request.";
+            }
+
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"There was a problem processing the program, because: \"{ex.Message}\"";
+            StateHasChanged();
+            await ScrollToTop();
+        }
+    }
+
+    public async Task<int> GetProductCount()
+    {
+        try
+        {
+            return PdfTableList.Count();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"There was a problem counting the number of products, because: \"{ex.Message}\"";
+            StateHasChanged();
+            await ScrollToTop();
+            return 0;
+        }
+    }
+
+    public async Task<bool> ValidateProductItems()
+    {
+        int number;
+
+        if (string.IsNullOrEmpty(ProductName))
+        {
+            ErrorMessage = $"Please enter the product name before adding a product.";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(ProductDescription))
+        {
+            ErrorMessage += $"Please enter the products description before adding a product.";
+            await ScrollToTop();
+            return false;
+        }
+        if (string.IsNullOrEmpty(ProductQty))
+        {
+            ErrorMessage += $"Please enter the products qty before adding a product.";
+            await ScrollToTop();
+            return false;
+        }
+
+        if (int.TryParse(ProductQty, out number))
+        {
+            if (number.ToString().Length > 3)
+            {
+                ErrorMessage += "The product QTY is higher than 999, please use a value less than 3 digits!";
+                await ScrollToTop();
+                return false;
+            }
+            return true;
+        }
+        else
+        {
+            ErrorMessage += "You need to insert a number and not text";
+            await ScrollToTop();
+            return false;
+        }
+    }
+
+    public async Task<bool> ValidateMainFormEntries()
+    {
+        if (string.IsNullOrEmpty(ClientName))
+        {
+            ErrorMessage += "You need to enter a client name!";
+            await ScrollToTop();
+            return false;
+        }
+
+        return true;
+
+    }
+
+    public async Task AddProductToList()
+    {
+        try
+        {
+            ErrorMessage = "";
+            PromptMessage = "";
+
+            bool valuesValidated = await ValidateProductItems();
+
+            if (!valuesValidated) { return; }
+
+            PdfTableList.Add(new PdfTable());
+            PdfTableList[i].ItemName = ProductName;
+            PdfTableList[i].ItemDescription = ProductDescription;
+            PdfTableList[i].Qty = ProductQty;
+            i++;
+
+            PromptMessage = $"{ProductName} added to the list of products.";
+            StateHasChanged();
+
+            ProductName = "";
+            ProductDescription = "";
+            ProductQty = "";
+            await ScrollToTop();
+
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"There was a problem adding the product to the table, because: \"{ex.Message}\". Please check your input.";
+            await ScrollToTop();
+        }
+    }
+
+    private async Task ScrollToTop()
+    {
+        await JsRuntime.InvokeVoidAsync("window.scrollToTop");
+    }
+
+}

@@ -1,15 +1,17 @@
-﻿using IronPdf;
-using System.Drawing;
-using Printer_Service.Models;
+﻿using PdfGenerator.Models;
 using Printer_Service.Data;
-using PdfGenerator;
-using PdfGenerator.Models;
+using Printer_Service.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Printer_Service
 {
-    public class PrinterController
+    public class PrinterOnlyController
     {
-        public bool PrintLabel(int copies)
+        public bool PrintLabel(int copies, string clientName, List<PdfTable> pdfTableList)
         {
             try
             {
@@ -25,13 +27,13 @@ namespace Printer_Service
                 StreamWriter writer = new StreamWriter(client.GetStream());
                 if (copies == 0) { copies = 1; }
 
-                var dataForLabel = PdfController.PdfToLabel;
-                var clientName = PdfController.PdfToLabel;
+                //var dataForLabel = PdfController.PdfToLabel;
+                //var clientName = PdfController.PdfToLabel;
                 bool printingSuccessful = false;
 
                 if (clientName != null)
                 {
-                    LabelData.CompanyName = clientName.ClientName;
+                    LabelData.CompanyName = clientName;
                 }
                 else
                 {
@@ -40,9 +42,9 @@ namespace Printer_Service
 
                 List<PdfTable> populatedItems = new();
 
-                if (dataForLabel != null)
+                if (pdfTableList != null)
                 {
-                    populatedItems = dataForLabel.ListOfItems.Where(x => !string.IsNullOrEmpty(x.ItemName)).ToList();
+                    populatedItems = pdfTableList.Where(x => !string.IsNullOrEmpty(x.ItemName)).ToList();
                 }
                 else
                 {
@@ -63,7 +65,7 @@ namespace Printer_Service
 
                     if (clientName != null)
                     {
-                        LabelData.CompanyName = clientName.ClientName;
+                        LabelData.CompanyName = clientName;
                     }
 
                     Labels labels = new Labels();
@@ -74,7 +76,7 @@ namespace Printer_Service
                         printingSuccessful = true;
                     }
                 }
-                
+
 
                 writer.Close();
 

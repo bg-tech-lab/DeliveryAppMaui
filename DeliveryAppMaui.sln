@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfGenerator", "PdfGenerato
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Printer_Service", "Printer_Service\Printer_Service.csproj", "{0422EBEA-7BA7-45F8-8E78-896348277394}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeliveryAppAPI", "DeliveryAppAPI\DeliveryAppAPI.csproj", "{9FC11B79-574B-47AF-8CE5-BD9A172304EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeliveryAppAPI", "DeliveryAppAPI\DeliveryAppAPI.csproj", "{9FC11B79-574B-47AF-8CE5-BD9A172304EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

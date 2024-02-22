@@ -13,15 +13,15 @@
         <EnableDefaultCssItems>false</EnableDefaultCssItems>
 
         <!-- Display name -->
-        <ApplicationTitle>Delivery Note App</ApplicationTitle>
+        <ApplicationTitle>d.Code Mobility Support Application</ApplicationTitle>
 
         <!-- App Identifier -->
         <ApplicationId>com.companyname.deliveryappmaui</ApplicationId>
         <ApplicationIdGuid>D9D3C5A4-F51A-4D58-87A4-FC2001B3DB9A</ApplicationIdGuid>
 
         <!-- Versions -->
-        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
+        <ApplicationDisplayVersion>2.0</ApplicationDisplayVersion>
+        <ApplicationVersion>2</ApplicationVersion>
 
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
@@ -59,13 +59,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="%24placeholder%24.scale-200.png" />
-      <None Remove="%24placeholder%24.scale-400.png" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="$placeholder$.scale-200.png" />
-      <Content Include="$placeholder$.scale-400.png" />
+      <Compile Remove="bin\**" />
+      <Content Remove="bin\**" />
+      <EmbeddedResource Remove="bin\**" />
+      <MauiXaml Remove="bin\**" />
+      <None Remove="bin\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -94,6 +92,10 @@
         <PackagePath>\</PackagePath>
         <Pack>True</Pack>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PRIResource Remove="bin\**" />
     </ItemGroup>
 
 </Project>

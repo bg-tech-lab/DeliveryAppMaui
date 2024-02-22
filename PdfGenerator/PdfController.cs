@@ -53,7 +53,8 @@ namespace PdfGenerator
                 var pdfDocument = GetHtmlPdf(clientName, clientAddress, clientContactDetails, location, productCount, listOfProducts);
                 using var PDF = Renderer.RenderHtmlAsPdf(pdfDocument);
                 //Renderer.RenderingOptions.TextFooter = new HtmlHeaderFooter() { HtmlFragment = "<div style='text-align:right'><em style='color:pink'>page {page} of {total-pages}</em></div>" };
-                var OutputPath = $"{clientName}-{PdfToLabel.ReferenceNumber}.pdf";
+                var shortenedGuid = PdfToLabel.ReferenceNumber.ToString("N").Substring(0, 5);
+                var OutputPath = $"{clientName}-{shortenedGuid}.pdf";
                 //var OutputPath = "ChromePdfRenderer.pdf";
 
                 if (string.IsNullOrEmpty(dir))
@@ -89,10 +90,8 @@ namespace PdfGenerator
             {
                 return "";
             }
-
         }
         
-
         private string GetHtmlPdf(string clientName, string clientAddress, string clientContactDetails, string location, int productCount, List<PdfTable> listOfProducts)
         {
             var pdfParams = GetValuesForPdf(clientName, clientAddress, clientContactDetails, location, productCount, listOfProducts);

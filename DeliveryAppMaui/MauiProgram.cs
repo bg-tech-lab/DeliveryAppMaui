@@ -40,6 +40,7 @@ namespace DeliveryAppMaui
             builder.Services.AddSingleton<Labels>();
             builder.Services.AddSingleton<LabelData>();
             builder.Services.AddSingleton<PrinterController>();
+            builder.Services.AddSingleton<PrinterOnlyController>();
 
 
             return builder.Build();

@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/dedicatedpdfgenerator"
 
 @inject MailContoller mailController
 @inject OutlookController outLookController
@@ -14,17 +14,8 @@
     <div class="pageContent">
         <div class="top_row">
             <div class="headingSubheading">
-                <h1 class="page_title">Generate Delivery Note</h1>
-                @* <p class="page_subtitle">This page is responsible for the following: </p> *@
+                <h1 class="page_title">Dedicated PDF Document Generator</h1>
             </div>
-            @* <span>
-                <ol>
-                    <li>Generates a delivery note (DN) in PDF format.</li>
-                    <li>Sending of an email to a list of reciepients.</li>
-                    <li>Sending of a calendar reminder and a copy of the DN.</li>
-                    <li>Prints pick labels for products.</li>
-                </ol>
-            </span> *@
             <div class="errorMessages">
                 <p class="prompt_message">@PromptMessage</p>
                 <p class="error_message">@ErrorMessage</p>
@@ -32,56 +23,32 @@
         </div>
 
         <div class="allForms_section">
-            <div class="form_section">
-                <fieldset>
-                    <legend>General Information:</legend>
-                    <label for="clientName">Client Name:</label>
-                    <input type="text" id="clientName" name="clientName" @bind-value="@ClientName">
-                    <label for="clientAddress">Client Address:</label>
-                    <input type="text" id="clientAddress" name="clientAddress" @bind-value="@ClientAddress">
-                    <label for="clientNumber">Client Number:</label>
-                    <input type="text" id="clientNumber" name="clientNumber" @bind-value="@ClientNumber">
-                    <label for="packagingLocation">Place of Packaging:</label>
-                    <input type="text" id="packagingLocation" name="packagingLocation" @bind-value="@PackingLocation">
-                    <label for="numberOfLabel">Number of Labels:</label>
-                    <input type="number" id="numberOfLabel" min="1" max="10" name="numberOfLabel" @bind-value="@NumberOfLabels">
-                </fieldset>
-            </div>
+            <div class="generalAndProduct_section">
+                <div class="form_section">
+                    <fieldset>
+                        <legend>General Information:</legend>
+                        <label for="clientName">Client Name:</label>
+                        <input type="text" id="clientName" name="clientName" @bind-value="@ClientName">
+                        <label for="clientAddress">Client Address:</label>
+                        <input type="text" id="clientAddress" name="clientAddress" @bind-value="@ClientAddress">
+                        <label for="clientNumber">Client Number:</label>
+                        <input type="text" id="clientNumber" name="clientNumber" @bind-value="@ClientNumber">
+                        <label for="packagingLocation">Place of Packaging:</label>
+                        <input type="text" id="packagingLocation" name="packagingLocation" @bind-value="@PackingLocation">
+                    </fieldset>
+                </div>
 
-            <div class="user_email_section">
-                <fieldset>
-                    <legend>Email From:</legend>
-                    <label for="userEmail">Email Address:</label>
-                    <input type="text" id="userEmail" name="userEmail" @bind-value="@UserEmailAddress">
-                    <label for="userPassword">Email Password:</label>
-                    <input type="password" id="userPassword" name="userPassword" @bind-value="@UserPassword">
-                </fieldset>
-
-                <fieldset>
-                    <legend>Recipients:</legend>
-                    <div class="tooltip_label_container">
-                        <label for="recipientsEmail">List of Email Addresses:</label>
-                        <div class="tooltip_container" id="ToolTip_1">
-                            <ToolTipTool IsVisible="tooltip1Visible" TooltipText="If you have multiple addresses, seperate them with the 'Enter' key." AdditionalCssClass="custom_tooltip1" />
-                        </div>
-                    </div>
-                    <textarea id="recipientsEmail" name="recipientsEmail" @bind="@ToEmailAddress"></textarea>
-                </fieldset>
-            </div>
-
-            <div class="user_reminder_section">
-                <fieldset>
-                    <legend>Calendar Reminder:</legend>
-                    <div class="tooltip_label_container">
-                        <label for="startDate">Start Date & Time:</label>
-                        <div class="tooltip_container" id="ToolTip_2">
-                            <ToolTipTool IsVisible="tooltip2Visible" TooltipText="Format easier to read: {2024}-{01}-{04}T{08}-{00}-{00}. This field will only take the correct format used as the fields placeholder." AdditionalCssClass="custom_tooltip2" />
-                        </div>
-                    </div>
-                    <input type="datetime-local" id="startDate" name="startDate" @bind-value="@StartDate">
-                    <label for="endDate">End Date & Time:</label>
-                    <input type="datetime-local" id="endDate" name="endDate" @bind-value="@EndDate">
-                </fieldset>
+                <div class="products_section">
+                    <fieldset>
+                        <legend>Product Information:</legend>
+                        <label for="ProductName">Product Name:</label>
+                        <input type="text" id="ProductName" name="ProductName" @bind-value="@ProductName">
+                        <label for="ProductDescription">Product Desctiption:</label>
+                        <textarea id="ProductDescription" name="ProductDescription" @bind="@ProductDescription"></textarea>
+                        <label for="ProductQty">Product Qty:</label>
+                        <input type="text" id="ProductQty" name="ProductQty" @bind-value="@ProductQty">
+                    </fieldset>
+                </div>
 
                 @if (PdfTableList.Count > 0)
                 {
@@ -105,24 +72,11 @@
 
             </div>
 
-            <div class="products_section">
-                <fieldset>
-                    <legend>Product Information:</legend>
-                    <label for="ProductName">Product Name:</label>
-                    <input type="text" id="ProductName" name="ProductName" @bind-value="@ProductName">
-                    <label for="ProductDescription">Product Desctiption:</label>
-                    <textarea id="ProductDescription" name="ProductDescription" @bind="@ProductDescription"></textarea>
-                    <label for="ProductQty">Product Qty:</label>
-                    <input type="text" id="ProductQty" name="ProductQty" @bind-value="@ProductQty">
-                </fieldset>
-            </div>
-
             <div class="buttons_section">
                 <button class="button" id="clearFieldsBtn" @onclick="(() =>ClearFields())">Clear</button>
                 <button class="button" id="startProcessBtn" @onclick="(() =>StartProcess())">Process</button>
                 <button class="button" id="addProductBtn" @onclick="(() =>AddProductToList())">Add Product</button>
             </div>
-
         </div>
     </div>
 </div>
@@ -139,11 +93,6 @@
     public static string CountryCode { get; set; } = "+27";
     public static string PackingLocation { get; set; }
 
-    public static string UserEmailAddress { get; set; }
-    public static string UserPassword { get; set; }
-
-    public static string ToEmailAddress { get; set; }
-    public static List<string> ListOfReceipients { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 
@@ -154,10 +103,8 @@
 
     public List<PdfTable> PdfTableList { get; set; }
 
-    public int NumberOfLabels { get; set; }
-
-    public static string ErrorMessage { get; set; }
-    public static string PromptMessage { get; set; }
+    public string ErrorMessage { get; set; }
+    public string PromptMessage { get; set; }
     public bool HasError { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -168,17 +115,12 @@
         ClientAddress = "";
         ClientNumber = $"{CountryCode} ";
         PackingLocation = "d.Code Mobility Offices";
-        UserEmailAddress = "blackgiraffejono@gmail.com";
-        UserPassword = "";
-        ToEmailAddress = "";
         ProductName = "";
         ProductDescription = "";
         ProductQty = "";
         StartDate = DateTime.Now.AddDays(7);
         EndDate = DateTime.Now.AddDays(14);
-        NumberOfLabels = 1;
         DCodeLogo = "/images/dcodelogo.png";
-        ListOfReceipients = new();
         await ScrollToTop();
     }
 
@@ -193,17 +135,12 @@
         ClientAddress = "";
         ClientNumber = $"{CountryCode} ";
         PackingLocation = "d.Code Mobility Offices";
-        UserEmailAddress = "blackgiraffejono@gmail.com";
-        UserPassword = "";
-        ToEmailAddress = "";
         ProductName = "";
         ProductDescription = "";
         ProductQty = "";
         StartDate = DateTime.Now.AddDays(7);
         EndDate = DateTime.Now.AddDays(14);
-        NumberOfLabels = 1;
         DCodeLogo = "/images/dcodelogo.png";
-        ListOfReceipients = new();
         PromptMessage = "All Fields Cleared!";
 
         await ScrollToTop();
@@ -248,59 +185,10 @@
                 StateHasChanged();
                 await ScrollToTop();
             }
-
-            var listOfReceipients = await GetEmailReceipients();
-
-            var numberOfEmailReceipients = ListOfReceipients.Count();
-
-            if (ListOfReceipients.Count() < 1)
-            {
-                ErrorMessage = "Please enter a valid number of email reciepients.";
-                StateHasChanged();
-                await ScrollToTop();
-                return;
-            }
-
-            bool hasError;
-            mailController.SendEmail(pdfDocumentDir, listOfReceipients, UserEmailAddress, UserPassword, ClientName, StartDate, EndDate, out hasError);
-
-            if (hasError)
-            {
-                ErrorMessage = "There was an issue with the sending of the mails, please double check your inputed values.";
-                StateHasChanged();
-                await ScrollToTop();
-                return;
-            }
-            else
-            {
-                PromptMessage = "Emails Successfully sent!";
-                StateHasChanged();
-                await ScrollToTop();
-            }
-
-            //Printer Functionality
-            var isPrinted = printerController.PrintLabel(NumberOfLabels);
-
-            if (isPrinted)
-            {
-                if(NumberOfLabels == 1)
-                {
-                    PromptMessage = $"{NumberOfLabels} label has been printed for {numberOfProducts} product!";
-                }
-                else
-                {
-                    PromptMessage = $"{NumberOfLabels} labels have been printed for {numberOfProducts} products!";
-                }
-            }
-            else
-            {
-                ErrorMessage = "No label or Labels were printed, there was an issue with the processing of your request.";
-            }
-
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"There was a problem processing the program, because: \"{ex.Message}\"";
+            ErrorMessage = $"There was a problem generating the PDF document, because: \"{ex.Message}\"";
             StateHasChanged();
             await ScrollToTop();
         }
@@ -360,10 +248,13 @@
             await ScrollToTop();
             return false;
         }
+
     }
 
     public async Task<bool> ValidateMainFormEntries()
     {
+        int number;
+
         if (string.IsNullOrEmpty(ClientName))
         {
             ErrorMessage += "You need to enter a client name!";
@@ -379,18 +270,6 @@
         if (string.IsNullOrEmpty(ClientNumber))
         {
             ErrorMessage += "You need to enter the clients contact details!";
-            await ScrollToTop();
-            return false;
-        }
-        if (string.IsNullOrEmpty(UserPassword))
-        {
-            ErrorMessage += "You need to enter the email address password, get it in Keeper!";
-            await ScrollToTop();
-            return false;
-        }
-        if (string.IsNullOrEmpty(ToEmailAddress))
-        {
-            ErrorMessage += "Your email receipt list is empty, no email will/ can be sent!";
             await ScrollToTop();
             return false;
         }
@@ -417,7 +296,7 @@
         }
         if (formattedNumber.Length < 12)
         {
-            if (formattedNumber.Length == 10)
+            if(formattedNumber.Length == 10)
             {
                 if (formattedNumber.StartsWith("0"))
                 {
@@ -472,32 +351,8 @@
         }
     }
 
-    public async Task<List<string>> GetEmailReceipients()
-    {
-        try
-        {
-            List<string> stringList = new List<string>(ToEmailAddress.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
-            ListOfReceipients = new();
-
-            foreach (var item in stringList)
-            {
-                ListOfReceipients.Add(item);
-            }
-
-            return ListOfReceipients;
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"There was a problem formatting the email reciepients, because: \"{ex.Message}\"";
-            StateHasChanged();
-            await ScrollToTop();
-            return new List<string>();
-        }
-    }
-
     private async Task ScrollToTop()
     {
         await JsRuntime.InvokeVoidAsync("window.scrollToTop");
     }
-
 }
